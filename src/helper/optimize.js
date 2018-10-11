@@ -18,9 +18,14 @@ export function processImage(image, toJPG, max2048) {
     img.src = url
 
     img.onload = function() {
-      const log2 = Math.log2(img.width)
+      const log2Width = Math.log2(img.width)
+      const log2Height = Math.log2(img.height)
 
-      const shouldResize = Math.floor(log2) !== log2 || (max2048 && log2 > 11)
+      const shouldResize =
+        Math.floor(log2Width) !== log2Width ||
+        Math.floor(log2Height) !== log2Height ||
+        (max2048 && log2Width > 11) ||
+        (max2048 && log2Height > 11)
       const shouldConvert = toJPG && !url.startsWith('data:image/jpeg')
 
       // no need to resize
@@ -29,20 +34,34 @@ export function processImage(image, toJPG, max2048) {
         return
       }
 
-      const size = Math.min(
-        2 ** Math.round(log2),
+      const width = Math.min(
+        2 ** Math.round(log2Width),
         shouldResize ? 2 ** 11 : Number.MAX_SAFE_INTEGER,
       )
 
+      const height = Math.min(
+        2 ** Math.round(log2Height),
+        shouldResize ? 2 ** 11 : Number.MAX_SAFE_INTEGER,
+      )
+
+      if (width / height !== img.width / img.height) {
+        alert(`Please make image ${image.uuid} width equal to height`)
+        return
+      }
+
       const canvas = document.createElement('canvas')
-      canvas.width = size
-      canvas.height = size
+      canvas.width = width
+      canvas.height = height
 
       const ctx = canvas.getContext('2d')
-      ctx.drawImage(img, 0, 0, size, size)
+      ctx.drawImage(img, 0, 0, width, height)
 
       // threejs editor's default quality is 0.6
-      image.url = canvas.toDataURL('image/jpeg', 0.6)
+      image.url = canvas.toDataURL(
+        // if not to jpg, convert to its original type
+        toJPG ? 'image/jpeg' : url.match(/:(.+);/)[1],
+        toJPG ? 0.6 : 1,
+      )
 
       resolve(true)
     }
