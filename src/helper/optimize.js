@@ -34,19 +34,20 @@ export function processImage(image, toJPG, max2048) {
         return
       }
 
-      const width = Math.min(
-        2 ** Math.round(log2Width),
-        shouldResize ? 2 ** 11 : Number.MAX_SAFE_INTEGER,
-      )
+      let width = 2 ** Math.round(log2Width)
+      let height = 2 ** Math.round(log2Height)
 
-      const height = Math.min(
-        2 ** Math.round(log2Height),
-        shouldResize ? 2 ** 11 : Number.MAX_SAFE_INTEGER,
-      )
+      const MAX_RES = 2 ** 11
+      if (shouldResize) {
+        if (width > MAX_RES) {
+          height = (height / width) * MAX_RES
+          width = MAX_RES
+        }
 
-      if (width / height !== img.width / img.height) {
-        alert(`Please make image ${image.uuid} width equal to height`)
-        return
+        if (height > MAX_RES) {
+          width = (width / height) * MAX_RES
+          height = MAX_RES
+        }
       }
 
       const canvas = document.createElement('canvas')
