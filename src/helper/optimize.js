@@ -140,43 +140,15 @@ export const reattachObjectUUID = delay((object, uuidMap) => {
   return count
 })
 
-export const removeDuplicateObjects = delay(object => {
-  const clone = JSON.parse(JSON.stringify(object))
-
-  const map = {}
-
-  // remove all name if ignore name
-  if (getIgnoreName()) {
-    traversal(clone, (val, key, obj) => {
-      map[obj.uuid] = obj
-      delete obj.name
-      delete obj.uuid
-    })
-  }
-
-  // collect all json and sort
-  const jsonArr = Object.entries(map).map(arr => [
-    arr[0],
-    JSON.stringify(arr[1]),
-  ])
-  sortByDict(jsonArr, 1)
-
-  // record and count duplicate json
+export const removeInvisible = delay(object => {
   let count = 0
-  const removeSet = new Set()
-  jsonArr.forEach((el, index, arr) => {
-    if (!index) return
-    if (el[1] === arr[index - 1][1]) {
-      removeSet.add(arr[index][0])
-      count++
-    }
-  })
 
-  // remove duplicate objects
   traversal(object, (val, key, obj) => {
-    if (!obj.children) return
-
-    obj.children = obj.children.filter(el => !removeSet.has(el.uuid))
+    if (obj.children) {
+      const length = obj.children.length
+      obj.children = obj.children.filter(el => el.visible !== false)
+      count += length - obj.children.length
+    }
   })
 
   return count
