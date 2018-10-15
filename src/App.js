@@ -109,7 +109,6 @@ export default {
         this.log(`merging complete`)
       }
 
-      console.log(this.json)
       this.step = 3
     },
     async optimize() {
