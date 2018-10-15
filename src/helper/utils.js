@@ -52,3 +52,13 @@ export function removeDuplicate(arr, getValue, uuidMap) {
 
   return count
 }
+
+export function isContainer(obj) {
+  return ['Group', 'Object3D', 'Scene'].includes(obj.type)
+}
+
+export const UNMOVED_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+
+export function isUnmovedContainer(obj) {
+  return obj && obj.matrix.toString() === UNMOVED_MATRIX.toString()
+}

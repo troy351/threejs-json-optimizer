@@ -9,6 +9,7 @@ import {
   reattachObjectUUID,
   removeUnused,
   removeInvisible,
+  removeDuplicateObjects,
 } from './helper/optimize'
 import { setIgnoreName } from './helper/utils'
 import { exportJSON } from './helper/export'
@@ -27,6 +28,7 @@ export default {
         toJPG: true,
         resizeImage: true,
         removeInvisible: true,
+        removeObjects: true,
       },
       searchUUID: '',
       searchResult: '',
@@ -107,6 +109,7 @@ export default {
         this.log(`merging complete`)
       }
 
+      console.log(this.json)
       this.step = 3
     },
     async optimize() {
@@ -156,9 +159,15 @@ export default {
       count = await reattachObjectUUID(scene.object, uuidMap)
       this.log(`${count} object${count > 1 ? 's were' : ' was'} reattached`)
 
-      if (this.config.removeInvisible) {
+      if (config.removeInvisible) {
         this.log('removing invisible objects')
         count = await removeInvisible(scene.object)
+        this.log(`${count} object${count > 1 ? 's were' : ' was'} removed`)
+      }
+
+      if (config.removeObjects) {
+        this.log('removing duplicate objects')
+        count = await removeDuplicateObjects(scene.object)
         this.log(`${count} object${count > 1 ? 's were' : ' was'} removed`)
       }
 

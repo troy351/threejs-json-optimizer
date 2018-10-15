@@ -4,6 +4,8 @@ import {
   removeAttachedJSON,
   getIgnoreName,
   sortByDict,
+  isContainer,
+  isUnmovedContainer,
 } from './utils'
 import { delay } from './delay'
 import { isUUID } from './uuid'
@@ -154,6 +156,71 @@ export const removeInvisible = delay(object => {
   return count
 })
 
+export const removeDuplicateObjects = delay(object => {
+  const clone = JSON.parse(JSON.stringify(object))
+
+  const collectedMap = {}
+  const collected = []
+
+  // remove all name if ignore name and attach parent
+  traversal(clone, (val, key, obj) => {
+    if (!collectedMap[obj.uuid]) {
+      collectedMap[obj.uuid] = true
+      collected.push([obj.uuid, obj])
+    }
+
+    if (getIgnoreName()) delete obj.name
+    delete obj.uuid
+    if (obj.children) obj.children.forEach(o => (o.parent = obj))
+  })
+
+  // collect all json and sort
+  const jsonArr = collected
+    .map(arr => {
+      const [key, val] = arr
+      if (isContainer(val)) return
+
+      // remove all unmoved parent
+      const v = JSON.parse(
+        JSON.stringify(
+          arr[1],
+          (key, val) => (key === 'children' ? undefined : val),
+        ),
+      )
+
+      let p = v
+      while (p) {
+        while (isUnmovedContainer(p.parent)) p.parent = p.parent.parent
+        p = p.parent
+      }
+
+      return [key, JSON.stringify(v)]
+    })
+    .filter(arr => arr)
+
+  sortByDict(jsonArr, 1)
+
+  // record and count duplicate json
+  let count = 0
+  const removeSet = new Set()
+  jsonArr.forEach((el, index, arr) => {
+    if (!index) return
+    if (el[1] === arr[index - 1][1]) {
+      removeSet.add(arr[index][0])
+      count++
+    }
+  })
+
+  // remove duplicate objects
+  traversal(object, (val, key, obj) => {
+    if (!obj.children) return
+
+    obj.children = obj.children.filter(el => !removeSet.has(el.uuid))
+  })
+
+  return count
+})
+
 export const removeUnused = delay(scene => {
   const map = {}
   let count = ARR_FIELDS.reduce((sum, key) => sum + scene[key].length, 0)
@@ -166,9 +233,7 @@ export const removeUnused = delay(scene => {
       if (!obj.children) return
 
       obj.children = obj.children.filter(el => {
-        const keep =
-          Object.keys(el).toString !==
-            'uuid,type,name,layers,matrix,children' || obj.children.length
+        const keep = !isContainer(el) || obj.children.length
         hasRemoved = hasRemoved || !keep
         count += !keep
         return keep

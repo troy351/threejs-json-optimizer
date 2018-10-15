@@ -5,6 +5,7 @@ export function traversal(obj, callback) {
     // only try objects which has uuid
     if (obj.uuid) callback(value, key, obj)
 
-    traversal(value, callback)
+    // skip traversal parent
+    if (key !== 'parent') traversal(value, callback)
   })
 }

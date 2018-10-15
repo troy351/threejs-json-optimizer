@@ -34,6 +34,8 @@
                    v-model="config.resizeImage">reduce image resolution to less than 2048x2048</li>
           <li><input type="checkbox"
                    v-model="config.removeInvisible">remove invisible objects</li>
+          <li><input type="checkbox"
+                   v-model="config.removeObjects">remove duplicate objects</li>
           <li><button @click="optimize">Optimize</button></li>
 
         </ul>
