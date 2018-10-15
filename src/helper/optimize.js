@@ -162,6 +162,12 @@ export const removeDuplicateObjects = delay(object => {
   const collectedMap = {}
   const collected = []
 
+  /**
+   * to determine whether two meshs are the same:
+   * there may be moved container (e.g. Group) which will case inside mesh moved,
+   * so not only the mesh should be same, all parent moved container should be the same too.
+   */
+
   // remove all name if ignore name and attach parent
   traversal(clone, (val, key, obj) => {
     if (!collectedMap[obj.uuid]) {
