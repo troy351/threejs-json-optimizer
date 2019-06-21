@@ -1,8 +1,18 @@
-export function exportJSON(json, filename = 'app') {
-  const a = document.createElement('a')
-  const blob = new Blob([JSON.stringify(json)])
+import { encode } from "@msgpack/msgpack";
 
-  a.download = filename + '-optimize.json'
+export function exportJSON(json, filename = 'app', compress = false) {
+  const a = document.createElement('a')
+
+  let blob
+  if (compress) {
+    blob = new Blob([encode(json)], { type: "application/octet-stream" })
+
+    a.download = filename + '-optimize.msgpack'
+  } else {
+    blob = new Blob([JSON.stringify(json)])
+
+    a.download = filename + '-optimize.json'
+  }
 
   a.href = URL.createObjectURL(blob)
   a.click()

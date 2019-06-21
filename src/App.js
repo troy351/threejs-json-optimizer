@@ -29,6 +29,7 @@ export default {
         resizeImage: true,
         removeInvisible: true,
         removeObjects: true,
+        compress: false
       },
       searchUUID: '',
       searchResult: '',
@@ -49,6 +50,7 @@ export default {
     reset() {
       this.logs = []
       Object.keys(this.config).forEach(key => (this.config[key] = true))
+      this.config.compress = false
     },
     fileChange(e) {
       this.files = [...e.target.files]
@@ -179,7 +181,7 @@ export default {
       this.step = 4
     },
     download() {
-      exportJSON(this.json, this.files[0].name.slice(0, -5))
+      exportJSON(this.json, this.files[0].name.slice(0, -5), this.config.compress)
     },
     search() {
       if (!isUUID(this.searchUUID)) return alert('Please input a valid uuid')
