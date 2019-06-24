@@ -36,9 +36,6 @@
                    v-model="config.removeInvisible">remove invisible objects</li>
           <li><input type="checkbox"
                    v-model="config.removeObjects">remove duplicate objects</li>
-          <li><input type="checkbox"
-                   v-model="config.compress">compress json via <a href="https://github.com/msgpack/msgpack-javascript"
-               target="_blank">msgpack</a></li>
           <li><button @click="optimize">Optimize</button></li>
 
         </ul>
@@ -59,6 +56,14 @@
       <p>
         <pre>{{searchResult}}</pre>
       </p>
+      <hr>
+      <p>Compress via <a href="https://github.com/msgpack/msgpack-javascript"
+           target="_blank">msgpack</a></p>
+      <p>
+        <input type="file"
+               accept="application/json"
+               @change="compressChange" />
+        Choose JSON file</p>
     </div>
     <div style="float:left;width:30%">
       <p>logs</p>

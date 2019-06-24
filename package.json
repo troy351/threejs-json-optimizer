@@ -13,7 +13,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@msgpack/msgpack": "^1.4.0",
+    "@msgpack/msgpack": "^1.4.4",
     "vue": "^2.6.10"
   },
   "devDependencies": {
