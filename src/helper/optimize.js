@@ -229,7 +229,7 @@ export const removeDuplicateObjects = delay(object => {
 
 export const removeUnused = delay(scene => {
   const map = {}
-  let count = ARR_FIELDS.reduce((sum, key) => sum + scene[key].length, 0)
+  let count = ARR_FIELDS.reduce((sum, key) => sum + (scene[key] || []).length, 0)
 
   // remove all empty Group or Object3d
   while (true) {
@@ -254,20 +254,42 @@ export const removeUnused = delay(scene => {
     if (isUUID(value)) map[value] = true
   })
 
-  scene.geometries = scene.geometries.filter(geo => map[geo.uuid])
-  scene.geometries.forEach(geo => (map[geo.uuid] = true))
+  if (scene.geometries) {
+    scene.geometries = scene.geometries.filter(geo => map[geo.uuid])
+    scene.geometries.forEach(geo => (map[geo.uuid] = true))
+  }
 
-  scene.materials = scene.materials.filter(mat => map[mat.uuid])
-  scene.materials.forEach(material =>
-    Object.entries(material).forEach(([key, val]) => {
-      if (isUUID(val)) map[val] = true
-    }),
-  )
+  if (scene.materials) {
+    scene.materials = scene.materials.filter(mat => map[mat.uuid])
+    scene.materials.forEach(material =>
+      Object.entries(material).forEach(([key, val]) => {
+        if (isUUID(val)) map[val] = true
+      }),
+    )
+  }
 
-  scene.textures = scene.textures.filter(text => map[text.uuid])
-  scene.textures.forEach(text => (map[text.image] = true))
+  if (scene.textures) {
+    scene.textures = scene.textures.filter(text => map[text.uuid])
+    scene.textures.forEach(text => (map[text.image] = true))
+  }
 
-  scene.images = scene.images.filter(img => map[img.uuid])
+  if (scene.images) {
+    scene.images = scene.images.filter(img => map[img.uuid])
+  }
 
-  return count - ARR_FIELDS.reduce((sum, key) => sum + scene[key].length, 0)
+
+  return count - ARR_FIELDS.reduce((sum, key) => sum + (scene[key] || []).length, 0)
+})
+
+export const removeUserData = delay(object => {
+  let count = 0
+
+  traversal(object, (val, key, obj) => {
+    if (key === 'userData') {
+      delete obj.userData
+      count++
+    }
+  })
+
+  return count
 })

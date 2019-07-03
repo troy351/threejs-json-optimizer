@@ -36,6 +36,8 @@
                    v-model="config.removeInvisible">remove invisible objects</li>
           <li><input type="checkbox"
                    v-model="config.removeObjects">remove duplicate objects</li>
+          <li><input type="checkbox"
+                   v-model="config.removeUserData">remove userData objects</li>
           <li><button @click="optimize">Optimize</button></li>
 
         </ul>

@@ -10,6 +10,7 @@ import {
   removeUnused,
   removeInvisible,
   removeDuplicateObjects,
+  removeUserData
 } from './helper/optimize'
 import { setIgnoreName } from './helper/utils'
 import { exportJSON, compressJSON } from './helper/export'
@@ -29,6 +30,7 @@ export default {
         resizeImage: true,
         removeInvisible: true,
         removeObjects: true,
+        removeUserData: true,
       },
       searchUUID: '',
       searchResult: '',
@@ -121,16 +123,18 @@ export default {
 
       setIgnoreName(config.ignoreName)
 
+      const images = scene.images || []
+
       this.log('removing duplicate images')
-      count = await removeDuplicateImages(scene.images, uuidMap)
+      count = await removeDuplicateImages(images, uuidMap)
       this.log(`${count} image${count > 1 ? 's were' : ' was'} removed`)
 
       this.log('processing images')
       this.log('0 image was processed')
       count = 0
-      for (let i = 0; i < scene.images.length; i++) {
+      for (let i = 0; i < images.length; i++) {
         const result = await processImage(
-          scene.images[i],
+          images[i],
           config.toJPG,
           config.resizeImage,
         )
@@ -143,30 +147,30 @@ export default {
       }
 
       this.log('removing duplicate textures')
-      count = await removeDuplicateTextures(scene.textures, uuidMap)
+      count = await removeDuplicateTextures(scene.textures || [], uuidMap)
       this.log(`${count} texture${count > 1 ? 's were' : ' was'} removed`)
 
       this.log('removing duplicate materials')
-      count = await removeDuplicateMaterials(scene.materials, uuidMap)
+      count = await removeDuplicateMaterials(scene.materials || [], uuidMap)
       this.log(`${count} material${count > 1 ? 's were' : ' was'} removed`)
 
       this.log('removing duplicate geometries')
-      count = await removeDuplicateGeometries(scene.geometries, uuidMap)
+      count = await removeDuplicateGeometries(scene.geometries || [], uuidMap)
       this.log(`${count} geometr${count > 1 ? 'ies were' : 'y was'} removed`)
 
       this.log('reattach object attached uuids')
-      count = await reattachObjectUUID(scene.object, uuidMap)
+      count = await reattachObjectUUID(scene.object || [], uuidMap)
       this.log(`${count} object${count > 1 ? 's were' : ' was'} reattached`)
 
       if (config.removeInvisible) {
         this.log('removing invisible objects')
-        count = await removeInvisible(scene.object)
+        count = await removeInvisible(scene.object || [])
         this.log(`${count} object${count > 1 ? 's were' : ' was'} removed`)
       }
 
       if (config.removeObjects) {
         this.log('removing duplicate objects')
-        count = await removeDuplicateObjects(scene.object)
+        count = await removeDuplicateObjects(scene.object || [])
         this.log(`${count} object${count > 1 ? 's were' : ' was'} removed`)
       }
 
@@ -175,6 +179,14 @@ export default {
       this.log(
         `${count} unused resource${count > 1 ? 's were' : ' was'} removed`,
       )
+
+      if (config.removeUserData) {
+        this.log('removing userData')
+        count = await removeUserData(scene)
+        this.log(
+          `${count} userData was removed`,
+        )
+      }
 
       this.step = 4
     },
