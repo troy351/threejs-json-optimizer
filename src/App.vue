@@ -58,14 +58,6 @@
       <p>
         <pre>{{searchResult}}</pre>
       </p>
-      <hr>
-      <p>Compress via <a href="https://github.com/msgpack/msgpack-javascript"
-           target="_blank">msgpack</a></p>
-      <p>
-        <input type="file"
-               accept="application/json"
-               @change="compressChange" />
-        Choose JSON file</p>
     </div>
     <div style="float:left;width:30%">
       <p>logs</p>

@@ -13,7 +13,7 @@ import {
   removeUserData
 } from './helper/optimize'
 import { setIgnoreName } from './helper/utils'
-import { exportJSON, compressJSON } from './helper/export'
+import { exportJSON } from './helper/export'
 import { isUUID } from './helper/uuid'
 import { findUUIDUsage } from './helper/usage'
 
@@ -202,12 +202,5 @@ export default {
 
       this.searchResult = findUUIDUsage(this.json, this.searchUUID)
     },
-    async compressChange(e) {
-      const file = e.target.files[0]
-      if (!file) return
-
-      const [json] = await readJSONFiles([file])
-      compressJSON(json, file.name.slice(0, -5))
-    }
   },
 }
