@@ -38,6 +38,8 @@
                    v-model="config.removeObjects">remove duplicate objects</li>
           <li><input type="checkbox"
                    v-model="config.removeUserData">remove userData</li>
+          <li><input type="checkbox"
+                   v-model="config.separateImages">separate images</li>
           <li><button @click="optimize">Optimize</button></li>
 
         </ul>

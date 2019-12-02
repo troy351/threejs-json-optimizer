@@ -13,12 +13,4 @@ export function resetUUID(json) {
   traversal(json, (value, key, obj) => {
     if (isUUID(value)) obj[key] = map[value] || value
   })
-
-  // special for scripts
-  const scripts = {}
-  Object.keys(json.scripts).forEach(key => {
-    scripts[map[key]] = json.scripts[key]
-  })
-
-  json.scripts = scripts
 }

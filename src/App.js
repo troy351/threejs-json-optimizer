@@ -17,6 +17,16 @@ import { exportJSON } from './helper/export'
 import { isUUID } from './helper/uuid'
 import { findUUIDUsage } from './helper/usage'
 
+const DEFAULT_CONFIG = {
+  ignoreName: true,
+  toJPG: true,
+  resizeImage: true,
+  removeInvisible: true,
+  removeObjects: true,
+  removeUserData: true,
+  separateImages: false
+}
+
 export default {
   name: 'app',
   data() {
@@ -24,14 +34,7 @@ export default {
       files: [],
       logs: [],
       step: 0,
-      config: {
-        ignoreName: true,
-        toJPG: true,
-        resizeImage: true,
-        removeInvisible: true,
-        removeObjects: true,
-        removeUserData: true,
-      },
+      config: { ...DEFAULT_CONFIG },
       searchUUID: '',
       searchResult: '',
     }
@@ -50,7 +53,7 @@ export default {
   methods: {
     reset() {
       this.logs = []
-      Object.keys(this.config).forEach(key => (this.config[key] = true))
+      this.config = { ...DEFAULT_CONFIG }
     },
     fileChange(e) {
       this.files = [...e.target.files]
@@ -80,14 +83,15 @@ export default {
       const jsons = await readJSONFiles(this.files)
 
       // content format check, to ensure files are threejs editor exported jsons
-      if (!jsons.every(f => f.metadata && f.metadata.type === 'App'))
+      if (!jsons.every(f => f.metadata))
         return alert(
           'Please choose valid json files exported by threejs editor',
         )
 
       this.log(`load complete`)
 
-      this.jsons = jsons
+      // use scene when from publish
+      this.jsons = jsons.map(f => f.metadata.type === 'App' ? f.scene : f)
     },
     async analyse() {
       this.reset()
@@ -114,7 +118,7 @@ export default {
       this.step = 3
     },
     async optimize() {
-      const scene = this.json.scene
+      const scene = this.json
       const config = this.config
 
       const uuidMap = new Map()

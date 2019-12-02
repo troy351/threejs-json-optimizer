@@ -19,30 +19,22 @@ export const mergeJSONS = delay((jsons, names) => {
   // reset all uuid to prevent duplicate uuid
   jsons.forEach(j => resetUUID(j))
 
-  const json = JSON.parse(JSON.stringify(jsons[0]))
-  const scene = json.scene
+  const target = { ...jsons[0] }
 
   // clear fields
-  json.scripts = {}
-  ARR_FIELDS.forEach(field => (scene[field] = []))
-  scene.object = createGroup('Scene', 'Scene')
-  scene.object.background = jsons[0].scene.object.background
+  ARR_FIELDS.forEach(field => (target[field] = []))
+  target.object = createGroup('merged-group')
 
   // merge
-  jsons.forEach((j, index) => {
-    const s = j.scene
-
-    // merge scripts
-    Object.assign(json.scripts, j.scripts)
-
+  jsons.forEach((json, index) => {
     // merge array fields
-    ARR_FIELDS.forEach(key => (scene[key] = scene[key].concat(s[key])))
+    ARR_FIELDS.forEach(key => (target[key] = target[key].concat(json[key])))
 
     // merge objects, to make each json file into a group
     const group = createGroup(names[index])
-    group.children = s.object.children
-    scene.object.children.push(group)
+    group.children = json.object.children
+    target.object.children.push(group)
   })
 
-  return json
+  return target
 })
