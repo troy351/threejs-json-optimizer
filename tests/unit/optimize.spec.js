@@ -1,4 +1,3 @@
-import { expect } from 'chai'
 import { removeDuplicateObjects } from '../../src/helper/optimize'
 import { UNMOVED_MATRIX } from '../../src/helper/utils'
 
@@ -59,7 +58,7 @@ describe('optimize', () => {
 
       await removeDuplicateObjects(before)
 
-      expect(before).to.deep.equal(after)
+      expect(before).toEqual(after)
     })
 
     it('do not remove when all parent elements are not the same', async () => {
@@ -97,7 +96,7 @@ describe('optimize', () => {
 
       await removeDuplicateObjects(before)
 
-      expect(before).to.deep.equal(after)
+      expect(before).toEqual(after)
     })
   })
 })
