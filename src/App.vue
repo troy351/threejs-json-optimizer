@@ -46,7 +46,7 @@
 
       <hr>
       <h3>Utility</h3>
-      <p>Size rank (Only shows geometries and images larger than 1MB)
+      <p>Size Rank (Only shows geometries and images larger than 1MB)
         <button style="margin-left:10px;"
                 @click="rank">Go</button>
       </p>
