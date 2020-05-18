@@ -210,7 +210,7 @@ export default {
     rank() {
       // only search geometry and image
       if (!this.json) {
-        alert('Please analysis json first')
+        alert('Please analyse a json in optimizer first')
         return
       }
 
