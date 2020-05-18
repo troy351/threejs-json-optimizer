@@ -8,7 +8,7 @@ import {
   isUnmovedContainer,
 } from './utils'
 import { delay } from './delay'
-import { isUUID } from './uuid'
+import { isUUID, getReplacedUuidFromMap, isUuidList } from './uuid'
 import { traversal } from './traversal'
 import { ARR_FIELDS } from './merge'
 
@@ -132,7 +132,8 @@ export const reattachObjectUUID = delay((object, uuidMap) => {
       }
 
       // replace if its uuid
-      if (isUUID(value)) obj[key] = uuidMap.get(value) || value
+      obj[key] = getReplacedUuidFromMap(value, uuidMap)
+
       if (obj[key] !== value) count++
     })
   }
@@ -228,7 +229,7 @@ export const removeDuplicateObjects = delay(object => {
 })
 
 export const removeUnused = delay(scene => {
-  const map = {}
+  const mapObj = {}
   let count = ARR_FIELDS.reduce((sum, key) => sum + (scene[key] || []).length, 0)
 
   // remove all empty Group or Object3d
@@ -249,34 +250,37 @@ export const removeUnused = delay(scene => {
     if (!hasRemoved) break
   }
 
+  function tagUUid(value) {
+    if (isUUID(value)) {
+      mapObj[value] = true
+    } else if (Array.isArray(value) && isUuidList(value)) {
+      value.forEach(val => mapObj[val] = true)
+    }
+  }
+
   // collect all uuids
-  traversal(scene.object, value => {
-    if (isUUID(value)) map[value] = true
-  })
+  traversal(scene.object, tagUUid)
 
   if (scene.geometries) {
-    scene.geometries = scene.geometries.filter(geo => map[geo.uuid])
-    scene.geometries.forEach(geo => (map[geo.uuid] = true))
+    scene.geometries = scene.geometries.filter(geo => mapObj[geo.uuid])
+    scene.geometries.forEach(geo => (mapObj[geo.uuid] = true))
   }
 
   if (scene.materials) {
-    scene.materials = scene.materials.filter(mat => map[mat.uuid])
+    scene.materials = scene.materials.filter(mat => mapObj[mat.uuid])
     scene.materials.forEach(material =>
-      Object.entries(material).forEach(([key, val]) => {
-        if (isUUID(val)) map[val] = true
-      }),
+      Object.entries(material).forEach(([key, val]) => tagUUid(val)),
     )
   }
 
   if (scene.textures) {
-    scene.textures = scene.textures.filter(text => map[text.uuid])
-    scene.textures.forEach(text => (map[text.image] = true))
+    scene.textures = scene.textures.filter(text => mapObj[text.uuid])
+    scene.textures.forEach(text => (mapObj[text.image] = true))
   }
 
   if (scene.images) {
-    scene.images = scene.images.filter(img => map[img.uuid])
+    scene.images = scene.images.filter(img => mapObj[img.uuid])
   }
-
 
   return count - ARR_FIELDS.reduce((sum, key) => sum + (scene[key] || []).length, 0)
 })

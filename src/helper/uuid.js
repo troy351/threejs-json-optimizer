@@ -42,3 +42,13 @@ const UUID_REGEXP = /^[0-9A-Z]{8}-([0-9A-Z]{4}-){3}[0-9A-Z]{12}$/
 export function isUUID(val) {
   return typeof val === 'string' && UUID_REGEXP.test(val)
 }
+
+export function isUuidList(val) {
+  return val.every(isUUID)
+}
+
+export function getReplacedUuidFromMap(value, map) {
+  if (isUUID(value)) return map.get(value) || value
+  if (Array.isArray(value) && isUuidList(value)) return value.map(val => map.get(val) || val)
+  return value
+}

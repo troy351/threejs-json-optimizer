@@ -37,6 +37,7 @@ export default {
       config: { ...DEFAULT_CONFIG },
       searchUUID: '',
       searchResult: '',
+      rankResult: ''
     }
   },
   computed: {
@@ -206,5 +207,24 @@ export default {
 
       this.searchResult = findUUIDUsage(this.json, this.searchUUID)
     },
+    rank() {
+      // only search geometry and image
+      if (!this.json) {
+        alert('Please analysis json first')
+        return
+      }
+
+      const scene = this.json
+
+      const res = []
+      scene.images.forEach(img => res.push({ type: 'image', uuid: img.uuid, len: JSON.stringify(img).length }))
+      scene.geometries.forEach(geo => res.push({ type: 'geometry', uuid: geo.uuid, len: JSON.stringify(geo).length }))
+
+      const ONE_MB = 1024 ** 2
+
+      this.rankResult = res.sort((a, b) => b.len - a.len)
+        .filter(item => item.len > ONE_MB)
+        .map(item => `uuid: ${item.uuid} type: ${item.type} size: ${(item.len / ONE_MB).toFixed(2)}MB`).join('\n')
+    }
   },
 }

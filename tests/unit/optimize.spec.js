@@ -98,5 +98,29 @@ describe('optimize', () => {
 
       expect(before).toEqual(after)
     })
+
+    it('support multiple material with a single mesh', async () => {
+      const before = {
+        uuid: 'B09849E7-1EF7-4292-8605-CEC82B4BB8CB',
+        type: 'Scene',
+        name: 'Scene',
+        matrix: UNMOVED_MATRIX,
+        children: [
+          {
+            uuid: '6BE858A4-C325-4CF9-90F8-B11D1345259E',
+            type: 'Mesh',
+            name: 'mesh1',
+            matrix: UNMOVED_MATRIX,
+            material: ['8133381D-11B9-4B33-B636-CD8F9B5821AA', '8133381D-11B9-4B33-B636-CD8F9B5821AB'],
+          }
+        ],
+      }
+
+      const after = JSON.parse(JSON.stringify(before))
+
+      await removeDuplicateObjects(before)
+
+      expect(before).toEqual(after)
+    })
   })
 })

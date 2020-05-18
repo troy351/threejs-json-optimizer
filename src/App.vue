@@ -46,6 +46,14 @@
 
       <hr>
       <h3>Utility</h3>
+      <p>Size rank (Only shows geometries and images larger than 1MB)
+        <button style="margin-left:10px;"
+                @click="rank">Go</button>
+      </p>
+      <p>
+        <pre>{{rankResult}}</pre>
+      </p>
+       <hr width="500" align="left">
       <p>UUID Search</p>
       <p>
         <input type="text"
