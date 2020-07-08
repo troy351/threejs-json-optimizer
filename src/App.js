@@ -16,6 +16,7 @@ import { setIgnoreName } from "./helper/utils";
 import { exportJSON } from "./helper/export";
 import { isUUID } from "./helper/uuid";
 import { findUUIDUsage } from "./helper/usage";
+import { traversal } from "./helper/traversal";
 
 const DEFAULT_CONFIG = {
   ignoreName: true,
@@ -37,7 +38,9 @@ export default {
       config: { ...DEFAULT_CONFIG },
       searchUUID: "",
       searchResult: "",
-      rankResult: "",
+      rankResult: [],
+      traceKeyword: "",
+      traceResult: [],
     };
   },
   computed: {
@@ -218,7 +221,7 @@ export default {
       if (scene.images) {
         scene.images.forEach((img) =>
           res.push({
-            type: "image   ",
+            type: "image",
             uuid: img.uuid,
             len: JSON.stringify(img).length,
           })
@@ -235,18 +238,83 @@ export default {
         );
       }
 
-      const ONE_MB = 1024 ** 2;
+      const ONE_KB = 1024;
+      const ONE_MB = ONE_KB ** 2;
+
+      function getOwnerInfo(item) {
+        if (item.type === "geometry") {
+          let mesh;
+          traversal(
+            scene.object,
+            (val, key, obj) => obj.geometry === item.uuid && (mesh = obj)
+          );
+
+          return `Mesh: <em>${mesh.name}</em> (${mesh.uuid})`;
+        }
+
+        if (item.type === "image") {
+          const texture = scene.textures.find((t) => t.image === item.uuid);
+
+          let textureType;
+          const material = scene.materials.find((m) =>
+            Object.entries(m).some(
+              ([key, val]) => val === texture.uuid && (textureType = key)
+            )
+          );
+
+          let mesh;
+          traversal(
+            scene.object,
+            (val, key, obj) =>
+              obj.material &&
+              (Array.isArray(obj.material)
+                ? obj.material.includes(material.uuid)
+                : obj.material === material.uuid) &&
+              (mesh = obj)
+          );
+
+          return `Mesh: <em>${mesh.name}</em> (${mesh.uuid})<br>Material: <em>${material.name}</em> (${material.uuid})<br>MapType: <em>${textureType}</em> (${texture.uuid})`;
+        }
+      }
 
       this.rankResult = res
         .sort((a, b) => b.len - a.len)
-        .filter((item) => item.len > ONE_MB)
-        .map(
-          (item) =>
-            `uuid: ${item.uuid}  type: ${item.type}  size: ${(
-              item.len / ONE_MB
-            ).toFixed(2)}MB`
-        )
-        .join("\n");
+        .filter((item) => item.len > ONE_MB / 2);
+
+      this.rankResult.forEach((item) => {
+        item.size =
+          item.len > ONE_MB
+            ? `${(item.len / ONE_MB).toFixed(2)} MB`
+            : `${(item.len / ONE_KB).toFixed(2)} KB`;
+
+        item.owner = getOwnerInfo(item);
+      });
+    },
+    trace() {
+      if (!this.traceKeyword) return alert("Please input a valid uuid or name");
+      if (!this.json) return alert("Please analyse a json in optimizer first");
+      if (this.files.length > 1)
+        return alert("Only support trace in one json file");
+
+      const keyword = this.traceKeyword.trim();
+      const isUuid = isUUID(keyword);
+
+      let mesh;
+
+      const object = JSON.parse(JSON.stringify(this.json.object));
+      traversal(object, (val, key, obj) => {
+        // add parent reference for object
+        if (obj.children) obj.children.forEach((c) => (c.parent = obj));
+        if (keyword === (isUuid ? obj.uuid : obj.name)) mesh = obj;
+      });
+
+      const res = [];
+      while (mesh) {
+        res.push({ name: mesh.name, uuid: mesh.uuid });
+        mesh = mesh.parent;
+      }
+
+      this.traceResult = res.reverse();
     },
   },
 };

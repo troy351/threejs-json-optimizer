@@ -45,19 +45,50 @@
       <p v-if="s4Visible">STEP 4: <button @click="download">download</button></p>
 
       <hr>
-      <h3>Utility</h3>
-      <p>Size Rank (Only shows geometries and images larger than 1MB)
-        <button style="margin-left:10px;"
-                @click="rank">Go</button>
-      </p>
+      <h3>Utility<sub style="font-weight:normal;margin-left:10px;color:gray;">use after <em>Analyse</em></sub></h3>
+      <p>Size Rank<button style="margin-left:10px;" @click="rank">Go</button></p>
+      <div v-show="rankResult.length">
+        <em>Only shows geometries and images larger than 500KB</em>
+         <table style="font-family: monospace;width: 100%;text-align: center;" border="1">
+         <thead>
+           <tr>    
+             <th width="320">uuid</th>
+             <th width="90">type</th>
+             <th width="90">size</th>
+             <th>owner</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr v-for="item in rankResult" :key="item.uuid">
+             <td>{{item.uuid}}</td>
+             <td>{{item.type}}</td>
+             <td>{{item.size}}</td>
+             <td style="text-align:left;" v-html="item.owner"></td>
+           </tr>
+         </tbody>
+       </table>
+      </div>
+      <hr width="500" align="left">
+      <p>Object Trace</p>
       <p>
-        <pre>{{rankResult}}</pre>
+        <input type="text"
+               placeholder="uuid or name"
+               style="width:300px;"
+               v-model="traceKeyword">
+        <button style="margin-left:10px;"
+                @click="trace">Trace</button>
       </p>
+      <div>
+        <p v-for="(item,i) in traceResult" :key="i" :style="{textIndent:i*20+'px'}">
+          - <em>{{item.name}}</em> ({{item.uuid}})
+        </p>
+      </div>
        <hr width="500" align="left">
       <p>UUID Search</p>
       <p>
         <input type="text"
-               placeholder="input the uuid here"
+               placeholder="uuid"
+               style="width:300px;"
                v-model="searchUUID">
         <button style="margin-left:10px;"
                 @click="search">Search</button>
