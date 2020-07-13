@@ -17,18 +17,20 @@ export const ARR_FIELDS = ['geometries', 'images', 'materials', 'textures']
 
 export const mergeJSONS = delay((jsons, names) => {
   // reset all uuid to prevent duplicate uuid
-  jsons.forEach(j => resetUUID(j))
+  jsons.forEach((j) => resetUUID(j))
 
   const target = { ...jsons[0] }
 
   // clear fields
-  ARR_FIELDS.forEach(field => (target[field] = []))
+  ARR_FIELDS.forEach((field) => (target[field] = []))
   target.object = createGroup('merged-group')
 
   // merge
   jsons.forEach((json, index) => {
-    // merge array fields
-    ARR_FIELDS.forEach(key => (target[key] = target[key].concat(json[key])))
+    // merge array fields, note `images` may not exists 
+    ARR_FIELDS.forEach(
+      (key) => (target[key] = target[key].concat(json[key] || []))
+    )
 
     // merge objects, to make each json file into a group
     const group = createGroup(names[index])
