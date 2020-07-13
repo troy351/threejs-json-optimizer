@@ -32,10 +32,9 @@ export const mergeJSONS = delay((jsons, names) => {
       (key) => (target[key] = target[key].concat(json[key] || []))
     )
 
-    // merge objects, to make each json file into a group
-    const group = createGroup(names[index])
-    group.children = json.object.children
-    target.object.children.push(group)
+    // merge objects, object name should be file name
+    json.object.name = names[index]
+    target.object.children.push(json.object)
   })
 
   return target
