@@ -20,27 +20,11 @@ export function processImage(image, toJPG, max2048) {
     img.src = url
 
     img.onload = function() {
-      const log2Width = Math.log2(img.width)
-      const log2Height = Math.log2(img.height)
-
-      const shouldResize =
-        Math.floor(log2Width) !== log2Width ||
-        Math.floor(log2Height) !== log2Height ||
-        (max2048 && log2Width > 11) ||
-        (max2048 && log2Height > 11)
-      const shouldConvert = toJPG && !url.startsWith('data:image/jpeg')
-
-      // no need to resize
-      if (!shouldResize && !shouldConvert) {
-        resolve(false)
-        return
-      }
-
-      let width = 2 ** Math.round(log2Width)
-      let height = 2 ** Math.round(log2Height)
+      let width = 2 ** Math.round(Math.log2(img.width))
+      let height = 2 ** Math.round(Math.log2(img.width))
 
       const MAX_RES = 2 ** 11
-      if (shouldResize) {
+      if (max2048) {
         if (width > MAX_RES) {
           height = (height / width) * MAX_RES
           width = MAX_RES
